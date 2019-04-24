@@ -15,7 +15,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class Main extends Application {
+
+    int max = 800;
+    int min = 0;
 
     @Override
     public void start(Stage stage) {
@@ -32,9 +37,21 @@ public class Main extends Application {
         ImageView shipImage = new ImageView(ship);
         shipImage.setFitWidth(120);
         shipImage.setFitHeight(80);
-        shipImage.setX(pane.getHeight() / 2);
+        shipImage.setX((pane.getHeight()+120) / 2);
         shipImage.setY(pane.getWidth() / 2);
         pane.getChildren().addAll(shipImage);
+
+        int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);
+
+        Image asteroid = new Image("/asteroid.png");
+        ImageView asteroidImage = new ImageView(asteroid);
+        asteroidImage.setFitWidth(40);
+        asteroidImage.setFitHeight(40);
+        asteroidImage.setX(randomNum);
+        asteroidImage.setY(0);
+        pane.getChildren().addAll(asteroidImage);
+
+
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>(){
             @Override
@@ -47,6 +64,18 @@ public class Main extends Application {
                 }
             }
         });
+
+        AnimationTimer timer = new AnimationTimer(){
+            @Override
+            public void handle(long now) {
+                System.out.println("moving asteroid down!");
+                if (asteroidImage.getY() < 500 ) {
+                    asteroidImage.setY(asteroidImage.getY() + 1.0);
+                }
+                //yourImageView.setY(yourImageView.getY() + 20.0 );
+            }
+        };
+        timer.start();
 
         stage.setTitle("Asteroids");
         stage.setScene(scene);
