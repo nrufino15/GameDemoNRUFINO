@@ -2,85 +2,141 @@ package sample;
 
 
 import javafx.animation.AnimationTimer;
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.event.EventHandler;
+import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.Group;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.util.Duration;
 
+import javax.swing.text.MaskFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Main extends Application {
+    private Pane root;
 
-    int max = 800;
-    int min = 0;
+    private AnimationTimer timer;
 
-    @Override
-    public void start(Stage stage) {
-        Pane pane = new Pane();
-        Scene scene = new Scene(pane, 800, 500);
+    private List<ImageView> asteroids = new ArrayList<>();
+    private javafx.scene.image.ImageView frog;
 
-        Image space = new Image("/space.png");
-        ImageView scapeImage = new ImageView(space);
-        scapeImage.setFitWidth(800);
-        scapeImage.setFitHeight(500);
-        pane.getChildren().addAll(scapeImage);
+    private Parent createContent() {
+        root = new Pane();
+        root.setPrefSize(800,500);
 
-        Image ship = new Image("/ship.png");
-        ImageView shipImage = new ImageView(ship);
-        shipImage.setFitWidth(120);
-        shipImage.setFitHeight(80);
-        shipImage.setX((pane.getHeight()+120) / 2);
-        shipImage.setY(pane.getWidth() / 2);
-        pane.getChildren().addAll(shipImage);
+        frog = initShip();
+        root.getChildren().add(frog);
 
-        int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);
-
-        Image asteroid = new Image("/asteroid.png");
-        ImageView asteroidImage = new ImageView(asteroid);
-        asteroidImage.setFitWidth(40);
-        asteroidImage.setFitHeight(40);
-        asteroidImage.setX(randomNum);
-        asteroidImage.setY(0);
-        pane.getChildren().addAll(asteroidImage);
-
-
-
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>(){
+        timer = new AnimationTimer() {
             @Override
-            public void handle(KeyEvent event){
-
-                if (event.getCode() == KeyCode.RIGHT) {
-                    shipImage.setLayoutX(shipImage.getLayoutX() + 15);
-                } else if (event.getCode() == KeyCode.LEFT) {
-                    shipImage.setLayoutX(shipImage.getLayoutX() - 15);
-                }
-            }
-        });
-
-        AnimationTimer timer = new AnimationTimer(){
-            @Override
-            public void handle(long now) {
-                System.out.println("moving asteroid down!");
-                if (asteroidImage.getY() < 500 ) {
-                    asteroidImage.setY(asteroidImage.getY() + 1.0);
-                }
-                //yourImageView.setY(yourImageView.getY() + 20.0 );
+            public void handle(long l) {
+                onUpdate();
             }
         };
         timer.start();
 
-        stage.setTitle("Asteroids");
-        stage.setScene(scene);
+        return root;
+    }
+
+    private javafx.scene.image.ImageView initShip(){
+        Image image = new Image("/ship.png");
+        javafx.scene.image.ImageView shipImage = new javafx.scene.image.ImageView(image);
+        shipImage.setFitWidth(70);
+        shipImage.setFitHeight(40);
+        shipImage.setTranslateX(400);
+        shipImage.setTranslateY(400);
+        return shipImage;
+    }
+
+    private javafx.scene.image.ImageView spawnAsteroid(){
+        Image image = new Image("/asteroid.png");
+
+        javafx.scene.image.ImageView asteroidImage = new javafx.scene.image.ImageView(image);
+
+        asteroidImage.setFitWidth(40);
+        asteroidImage.setFitHeight(40);
+
+        asteroidImage.setTranslateX((int) (Math.random() * 14) *40);
+
+        root.getChildren().add(asteroidImage);
+        return asteroidImage;
+    }
+
+    private void onUpdate() {
+        for (ImageView asteroid : asteroids) {
+            asteroid.setTranslateY(asteroid.getTranslateY() + Math.random() * 10);
+        }
+        if (Math.random() < 0.075) {
+            asteroids.add(spawnAsteroid());
+        }
+        checkState();
+    }
+
+    private void checkState() {
+        for (ImageView asteroid : asteroids ) {
+            if (asteroid.getBoundsInParent().intersects(frog.getBoundsInParent())) {
+                frog.setTranslateX(400);
+                frog.setTranslateY(400);
+                return;
+            }
+        }
+        if (frog.getTranslateY() <= 0) {
+            timer.stop();
+            String win = "YOU WIN";
+
+            for (int i = 0; i < win.toCharArray().length; i++){
+                char letter = win.charAt(i);
+
+                HBox hBox = new HBox();
+                hBox.setTranslateX(350);
+                hBox.setTranslateY(250);
+                root.getChildren().add(hBox);
+
+                Text text = new Text(String.valueOf(letter));
+                text.setFont(Font.font(48));
+                text.setOpacity(0);
+
+                hBox.getChildren().add(text);
+
+                FadeTransition ft = new FadeTransition(Duration.seconds(0.66), text);
+                ft.setToValue(1);
+                ft.setDelay(Duration.seconds(i * 0.15));
+                ft.play();
+            }
+        }
+    }
+
+    @Override
+    public void start(Stage stage) {
+        stage.setScene(new Scene(createContent()));
+        stage.getScene().setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case W:
+                    frog.setTranslateY(frog.getTranslateY() - 40);
+                    break;
+                case S:
+                    frog.setTranslateY(frog.getTranslateY() + 40);
+                    break;
+                case A:
+                    frog.setTranslateX(frog.getTranslateX() - 40);
+                    break;
+                case D:
+                    frog.setTranslateX(frog.getTranslateX() + 40);
+                    break;
+                default:
+                    break;
+            }
+        });
         stage.show();
-}
+    }
 
     public static void main(String[] args) {
         launch(args);
