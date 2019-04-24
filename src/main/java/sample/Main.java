@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -70,7 +71,7 @@ public class Main extends Application {
     private ImageView initEarth() {
         Image image = new Image("/earth.png");
         ImageView earthImage = new javafx.scene.image.ImageView(image);
-        earthImage.setTranslateX(100);
+        earthImage.setTranslateX(50);
         earthImage.setTranslateY(300);
         return earthImage;
     }
@@ -78,7 +79,7 @@ public class Main extends Application {
     private ImageView initSun() {
         Image image = new Image("/sun.png");
         ImageView sunImage = new javafx.scene.image.ImageView(image);
-        sunImage.setTranslateX(700);
+        sunImage.setTranslateX(650);
         sunImage.setTranslateY(100);
         return sunImage;
     }
@@ -131,16 +132,18 @@ public class Main extends Application {
             timer.stop();
             String win = "YOU WIN";
 
+            HBox hBox = new HBox();
+            hBox.setTranslateX(300);
+            hBox.setTranslateY(root.getHeight()/2);
+            root.getChildren().add(hBox);
+
             for (int i = 0; i < win.toCharArray().length; i++){
                 char letter = win.charAt(i);
 
-                HBox hBox = new HBox();
-                hBox.setTranslateX(350);
-                hBox.setTranslateY(250);
-                root.getChildren().add(hBox);
 
                 Text text = new Text(String.valueOf(letter));
                 text.setFont(Font.font(48));
+                text.setFill(Color.WHITE);
                 text.setOpacity(0);
 
                 hBox.getChildren().add(text);
