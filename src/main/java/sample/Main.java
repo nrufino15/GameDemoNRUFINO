@@ -1,6 +1,7 @@
 package sample;
 
 
+import com.sun.javafx.scene.control.behavior.TwoLevelFocusBehavior;
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -46,7 +47,6 @@ public class Main extends Application {
         ship = initShip();
         root.getChildren().add(ship);
 
-
         timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
@@ -57,6 +57,7 @@ public class Main extends Application {
 
         return root;
     }
+
 
     private ImageView initBackground() {
         Image image = new Image("/space.png");
@@ -112,7 +113,7 @@ public class Main extends Application {
         for (ImageView asteroid : asteroids) {
             asteroid.setTranslateY(asteroid.getTranslateY() + Math.random() * 10);
         }
-        if (Math.random() < 0.075) {
+        if (Math.random() < 0.035) {
             asteroids.add(spawnAsteroid());
         }
         checkState();
@@ -121,9 +122,9 @@ public class Main extends Application {
     private void checkState() {
         for (ImageView asteroid : asteroids ) {
             if (asteroid.getBoundsInParent().intersects(ship.getBoundsInParent())) {
-                life = life -1;
                 ship.setTranslateX(600);
                 ship.setTranslateY(400);
+                life--;
                 return;
             }
         }
@@ -154,6 +155,41 @@ public class Main extends Application {
                 ft.play();
             }
         }
+
+        if (life <= 0) {
+            timer.stop();
+            String win = "YOU LOSE";
+
+            HBox hBox = new HBox();
+            hBox.setTranslateX(300);
+            hBox.setTranslateY(root.getHeight()/2);
+            root.getChildren().add(hBox);
+
+            for (int i = 0; i < win.toCharArray().length; i++){
+                char letter = win.charAt(i);
+
+
+                Text text = new Text(String.valueOf(letter));
+                text.setFont(Font.font(48));
+                text.setFill(Color.WHITE);
+                text.setOpacity(0);
+
+                hBox.getChildren().add(text);
+
+                FadeTransition ft = new FadeTransition(Duration.seconds(0.66), text);
+                ft.setToValue(1);
+                ft.setDelay(Duration.seconds(i * 0.15));
+                ft.play();
+            }
+        }
+
+        Text text = new Text("Vidas: " + life);
+        text.setFill(Color.WHITE);
+        text.setFont(Font.font(18));
+        text.setX(720);
+        text.setY(500);
+        root.getChildren().add(text);
+        System.out.println(life);
     }
 
     @Override
@@ -178,6 +214,7 @@ public class Main extends Application {
             }
         });
         stage.show();
+
     }
 
     public static void main(String[] args) {
