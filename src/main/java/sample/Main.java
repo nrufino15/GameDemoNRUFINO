@@ -14,26 +14,37 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.util.Duration;
-
-import javax.swing.text.MaskFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Main extends Application {
     private Pane root;
+    private int life = 3;
 
     private AnimationTimer timer;
 
     private List<ImageView> asteroids = new ArrayList<>();
-    private javafx.scene.image.ImageView frog;
+    private ImageView ship;
+    private ImageView space;
+    private ImageView earth;
+    private ImageView sun;
 
     private Parent createContent() {
         root = new Pane();
         root.setPrefSize(800,500);
 
-        frog = initShip();
-        root.getChildren().add(frog);
+        space = initBackground();
+        root.getChildren().add(space);
+
+        earth = initEarth();
+        root.getChildren().add(earth);
+
+        sun = initSun();
+        root.getChildren().add(sun);
+
+        ship = initShip();
+        root.getChildren().add(ship);
+
 
         timer = new AnimationTimer() {
             @Override
@@ -46,20 +57,46 @@ public class Main extends Application {
         return root;
     }
 
-    private javafx.scene.image.ImageView initShip(){
+    private ImageView initBackground() {
+        Image image = new Image("/space.png");
+        javafx.scene.image.ImageView spaceImage = new javafx.scene.image.ImageView(image);
+        spaceImage.setFitWidth(800);
+        spaceImage.setFitHeight(500);
+        spaceImage.setTranslateX(0);
+        spaceImage.setTranslateY(0);
+        return spaceImage;
+    }
+
+    private ImageView initEarth() {
+        Image image = new Image("/earth.png");
+        ImageView earthImage = new javafx.scene.image.ImageView(image);
+        earthImage.setTranslateX(100);
+        earthImage.setTranslateY(300);
+        return earthImage;
+    }
+
+    private ImageView initSun() {
+        Image image = new Image("/sun.png");
+        ImageView sunImage = new javafx.scene.image.ImageView(image);
+        sunImage.setTranslateX(700);
+        sunImage.setTranslateY(100);
+        return sunImage;
+    }
+
+    private ImageView initShip(){
         Image image = new Image("/ship.png");
-        javafx.scene.image.ImageView shipImage = new javafx.scene.image.ImageView(image);
-        shipImage.setFitWidth(70);
+        ImageView shipImage = new javafx.scene.image.ImageView(image);
+        shipImage.setFitWidth(60);
         shipImage.setFitHeight(40);
         shipImage.setTranslateX(400);
         shipImage.setTranslateY(400);
         return shipImage;
     }
 
-    private javafx.scene.image.ImageView spawnAsteroid(){
+    private ImageView spawnAsteroid(){
         Image image = new Image("/asteroid.png");
 
-        javafx.scene.image.ImageView asteroidImage = new javafx.scene.image.ImageView(image);
+        ImageView asteroidImage = new javafx.scene.image.ImageView(image);
 
         asteroidImage.setFitWidth(40);
         asteroidImage.setFitHeight(40);
@@ -82,13 +119,15 @@ public class Main extends Application {
 
     private void checkState() {
         for (ImageView asteroid : asteroids ) {
-            if (asteroid.getBoundsInParent().intersects(frog.getBoundsInParent())) {
-                frog.setTranslateX(400);
-                frog.setTranslateY(400);
+            if (asteroid.getBoundsInParent().intersects(ship.getBoundsInParent())) {
+                life = life -1;
+                ship.setTranslateX(600);
+                ship.setTranslateY(400);
                 return;
             }
         }
-        if (frog.getTranslateY() <= 0) {
+
+        if (ship.getTranslateY() <= 0) {
             timer.stop();
             String win = "YOU WIN";
 
@@ -120,16 +159,16 @@ public class Main extends Application {
         stage.getScene().setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case W:
-                    frog.setTranslateY(frog.getTranslateY() - 40);
+                    ship.setTranslateY(ship.getTranslateY() - 30);
                     break;
                 case S:
-                    frog.setTranslateY(frog.getTranslateY() + 40);
+                    ship.setTranslateY(ship.getTranslateY() + 30);
                     break;
                 case A:
-                    frog.setTranslateX(frog.getTranslateX() - 40);
+                    ship.setTranslateX(ship.getTranslateX() - 30);
                     break;
                 case D:
-                    frog.setTranslateX(frog.getTranslateX() + 40);
+                    ship.setTranslateX(ship.getTranslateX() + 30);
                     break;
                 default:
                     break;
